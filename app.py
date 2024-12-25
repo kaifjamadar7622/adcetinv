@@ -38,11 +38,34 @@ class Requirement(db.Model):
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     requirement_id = db.Column(db.Integer, db.ForeignKey('requirement.id'), nullable=False)
-    # Add other fields as necessary
+
+class Contractor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
 
 
 with app.app_context():
     db.create_all()
+
+@app.route('/contractor/register', methods=['POST'])
+def register_contractor():
+    data = request.json
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({"message": "Missing fields in request"}), 400
+
+    existing_contractor = Contractor.query.filter_by(username=data['username']).first()
+    if existing_contractor:
+        return jsonify({"message": "Contractor already exists"}), 409
+
+    hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+
+    new_contractor = Contractor(username=data['username'], password=hashed_password)
+    db.session.add(new_contractor)
+    db.session.commit()
+
+    return jsonify({"message": "Contractor created successfully!"}), 201
+
 
 
 @app.route('/register', methods=['POST'])
