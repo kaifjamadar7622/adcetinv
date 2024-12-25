@@ -1,15 +1,18 @@
 from flask import Flask, request, jsonify
-from flask_pymongo import PyMongo
-from bson.objectid import ObjectId
+from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
+from werkzeug.utils import secure_filename
+from flask_jwt_extended import JWTManager, create_access_token,jwt_required,get_jwt_identity
+import os
 
 app = Flask(__name__)
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///digital_platform.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'uploads'  # Folder to save uploaded files
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limit upload size to 16 MB
-ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}  # Allowed file types
+app.config['UPLOAD_FOLDER'] = 'uploads'  
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}  
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
